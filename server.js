@@ -5,19 +5,26 @@ const bcrypt = require("bcryptjs");
 const { Pool } = require("pg");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // ===============================
 // CONFIGURACIÓN POSTGRESQL
 // ===============================
 
-const pool = new Pool({
-    user: "postgres",
-    host: "localhost",
-    database: "crud_postgres",
-    password: "12345678",
-    port: 5432
-});
+const pool = new Pool(
+    process.env.DATABASE_URL
+        ? {
+            connectionString: process.env.DATABASE_URL,
+            ssl: { rejectUnauthorized: false }
+        }
+        : {
+            user: "postgres",
+            host: "localhost",
+            database: "crud_postgres",
+            password: "12345678",
+            port: 5432
+        }
+);
 
 // ===============================
 // MIDDLEWARE
@@ -325,13 +332,12 @@ async function iniciarServidor() {
     await crearTablas();
 
     app.listen(PORT, "0.0.0.0", () => {
-    console.log("-----------------------------------");
-    console.log("Servidor ejecutándose correctamente");
-    console.log(`Puerto: ${PORT}`);
-    console.log("Acceso local: http://localhost:3000");
-    console.log("Acceso por red: http://IP_DEL_SERVIDOR:3000");
-    console.log("-----------------------------------");
-});
+        console.log("-----------------------------------");
+        console.log("Servidor ejecutándose correctamente");
+        console.log(`Puerto: ${PORT}`);
+        console.log("Acceso local: http://localhost:" + PORT);
+        console.log("-----------------------------------");
+    });
 }
 
 iniciarServidor();
