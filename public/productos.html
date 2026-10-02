@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>CRUD Productos</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <header>
+
+        <h1>Administración de Productos</h1>
+
+        <div>
+
+            Usuario:
+            <strong id="usuarioActual"></strong>
+
+            <button onclick="cerrarSesion()">
+                Cerrar sesión
+            </button>
+
+        </div>
+
+    </header>
+
+    <main>
+
+        <section class="formulario">
+
+            <h2 id="tituloFormulario">
+                Agregar producto
+            </h2>
+
+            <input type="hidden" id="id">
+
+            <label>Nombre</label>
+
+            <input
+                type="text"
+                id="nombre"
+                placeholder="Nombre del producto"
+            >
+
+            <label>Precio</label>
+
+            <input
+                type="number"
+                id="precio"
+                step="0.01"
+                placeholder="Precio"
+            >
+
+            <label>Cantidad</label>
+
+            <input
+                type="number"
+                id="cantidad"
+                placeholder="Cantidad"
+            >
+
+            <button onclick="guardarProducto()">
+                Guardar producto
+            </button>
+
+            <button
+                class="cancelar"
+                onclick="limpiarFormulario()">
+
+                Cancelar
+
+            </button>
+
+            <p id="mensaje"></p>
+
+        </section>
+
+        <section>
+
+            <h2>Lista de productos</h2>
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>Acciones</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="tablaProductos"></tbody>
+
+            </table>
+
+        </section>
+
+    </main>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

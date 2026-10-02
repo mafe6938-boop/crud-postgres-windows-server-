@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Usuarios</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 40px;
+            margin: 0;
+        }
+        .contenedor {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #ccc;
+        }
+        h1 { text-align: center; }
+        .formulario {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-guardar { background: #28a745; color: white; }
+        .btn-editar { background: #007bff; color: white; }
+        .btn-eliminar { background: #dc3545; color: white; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th { background: #333; color: white; }
+        .acciones { display: flex; gap: 5px; }
+        @media (max-width: 700px) {
+            .formulario { flex-direction: column; }
+            .acciones { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+<div class="contenedor">
+    <h1>CRUD de Usuarios</h1>
+
+    <div class="formulario">
+        <input type="text" id="nombre" placeholder="Nombre">
+        <input type="email" id="email" placeholder="Email">
+        <button class="btn-guardar" onclick="guardarUsuario()">Guardar</button>
+    </div>
+
+    <h2>Usuarios</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tabla"></tbody>
+    </table>
+</div>
+
+<script>
+let usuarioEditando = null;
+
+async function cargarUsuarios() {
+    try {
+        const respuesta = await fetch("/api/usuarios");
+        const usuarios = await respuesta.json();
+        const tabla = document.getElementById("tabla");
+        tabla.innerHTML = "";
+
+        usuarios.forEach(usuario => {
+            const fila = document.createElement("tr");
+
+            const id = document.createElement("td");
+            id.textContent = usuario.id;
+
+            const nombre = document.createElement("td");
+            nombre.textContent = usuario.nombre;
+
+            const email = document.createElement("td");
+            email.textContent = usuario.email;
+
+            const acciones = document.createElement("td");
+            acciones.className = "acciones";
+
+            const editarBtn = document.createElement("button");
+            editarBtn.className = "btn-editar";
+            editarBtn.textContent = "Editar";
+            editarBtn.onclick = () => editar(usuario.id, usuario.nombre, usuario.email);
+
+            const eliminarBtn = document.createElement("button");
+            eliminarBtn.className = "btn-eliminar";
+            eliminarBtn.textContent = "Eliminar";
+            eliminarBtn.onclick = () => eliminar(usuario.id);
+
+            acciones.appendChild(editarBtn);
+            acciones.appendChild(eliminarBtn);
+
+            fila.appendChild(id);
+            fila.appendChild(nombre);
+            fila.appendChild(email);
+            fila.appendChild(acciones);
+            tabla.appendChild(fila);
+        });
+    } catch (error) {
+        console.error(error);
+        alert("No se pudieron cargar los usuarios.");
+    }
+}
+
+async function guardarUsuario() {
+    const nombre = document.getElementById("nombre").value.trim();
+    const email = document.getElementById("email").value.trim();
+
+    if (!nombre || !email) {
+        alert("Completa todos los campos");
+        return;
+    }
+
+    const url = usuarioEditando === null
+        ? "/api/usuarios"
+        : `/api/usuarios/${usuarioEditando}`;
+
+    const metodo = usuarioEditando === null ? "POST" : "PUT";
+
+    try {
+        const respuesta = await fetch(url, {
+            method: metodo,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nombre, email })
+        });
+
+        if (!respuesta.ok) {
+            throw new Error("Error en la operación");
+        }
+
+        limpiarFormulario();
+        await cargarUsuarios();
+    } catch (error) {
+        console.error(error);
+        alert("No se pudo guardar el usuario.");
+    }
+}
+
+function editar(id, nombre, email) {
+    usuarioEditando = id;
+    document.getElementById("nombre").value = nombre;
+    document.getElementById("email").value = email;
+    document.getElementById("nombre").focus();
+}
+
+async function eliminar(id) {
+    if (!confirm("¿Eliminar usuario?")) return;
+
+    try {
+        const respuesta = await fetch(`/api/usuarios/${id}`, {
+            method: "DELETE"
+        });
+
+        if (!respuesta.ok) throw new Error("Error al eliminar");
+
+        await cargarUsuarios();
+    } catch (error) {
+        console.error(error);
+        alert("No se pudo eliminar el usuario.");
+    }
+}
+
+function limpiarFormulario() {
+    document.getElementById("nombre").value = "";
+    document.getElementById("email").value = "";
+    usuarioEditando = null;
+}
+
+cargarUsuarios();
+</script>
+</body>
+</html>
